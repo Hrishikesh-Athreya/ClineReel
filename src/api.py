@@ -58,26 +58,21 @@ async def process_video_templated(job_id: str, url: str):
     try:
         # Stage 1: Scraping
         _update_job(job_id, stage="scraping", stage_detail="Scraping website content...")
-        from src.agents.scraper import scrape_url as _scrape
-        scraped_data = _scrape(url)
+        scraped_data = scrape_url(url)
         if not scraped_data:
             raise ValueError("Scraping failed: Could not retrieve data from website.")
         _update_job(job_id, stage_detail=f"Scraped '{scraped_data.get('title', 'site')}'")
 
         # Stage 2: Analyzing
         _update_job(job_id, stage="analyzing", stage_detail="AI analyzing website content...")
-        props = orchestrate_pipeline.__wrapped__(url, scraped_data) if hasattr(orchestrate_pipeline, '__wrapped__') else None
-        # Actually just call the pipeline which does analyze + direct
-        # But pipeline re-scrapes. Let's just call it directly:
-        from src.agents.agents import Agents as _Agents
-        analysis = _Agents.analyze(scraped_data)
+        analysis = Agents.analyze(scraped_data)
         _update_job(job_id, stage_detail=f"Hook: {analysis.hook[:60]}...")
 
         # Stage 3: Generating
         _update_job(job_id, stage="generating", stage_detail="Generating video props...")
         project_title = scraped_data.get("title", "Project")
         gallery_images = scraped_data.get("gallery", [])
-        direction = _Agents.direct(project_title, analysis, gallery_images)
+        direction = Agents.direct(project_title, analysis, gallery_images)
         showcase_props = ShowcaseProps(config=direction)
 
         props_path = os.path.abspath(f"outputs/temp_props_{job_id}.json")

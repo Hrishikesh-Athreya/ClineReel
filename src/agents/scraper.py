@@ -16,7 +16,7 @@ load_dotenv()
 FIRECRAWL_API_KEY = os.environ.get("FIRECRAWL_API_KEY")
 FIRECRAWL_ENDPOINT = "https://api.firecrawl.dev/v1/scrape"
 
-BROWSER_USE_API_KEY = "bu_lUvYypnKh8hsbNpKrYxpQKckPTHvcPIYlNaUnlT3XWg"
+BROWSER_USE_API_KEY = os.environ.get("BROWSER_USE_API_KEY")
 BROWSER_USE_ENDPOINT = "https://api.browser-use.com/api/v2/skills/d68e4535-36d8-402c-b637-79207245b916/execute"
 
 

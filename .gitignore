@@ -7,3 +7,7 @@ outputs
 *.mp4
 chrome-headless-shell.zip
 example
+last_director_response.json
+last_storyboard.json
+*.mp3
+node_modules/

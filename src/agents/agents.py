@@ -115,7 +115,7 @@ Generate the JSON configuration based on the provided Analysis.
         
         parsed = completion.choices[0].message.parsed
         # Save debug
-        with open("last_director_response.json", "w") as f:
+        with open("outputs/last_director_response.json", "w") as f:
             f.write(completion.choices[0].message.content or "")
 
         return parsed
@@ -216,7 +216,7 @@ Available Images:
             raise ValueError("Creative Director returned no storyboard")
 
         # Save debug
-        with open("last_storyboard.json", "w") as f:
+        with open("outputs/last_storyboard.json", "w") as f:
             f.write(completion.choices[0].message.content or "")
 
         return parsed
