@@ -20,6 +20,7 @@ import subprocess
 import tempfile
 from dotenv import load_dotenv
 from .assets import upload_standard_assets
+from .audio import generate_scene_voiceovers, prepare_background_music
 
 load_dotenv()
 
@@ -232,9 +233,23 @@ async def _render_agentic(
         )
         print(f"[agentic] Storyboard ready: {len(storyboard.scenes)} scenes")
 
-    # --- 3. Build the implementation brief from the storyboard ---
+    # --- 3. Generate audio (voiceovers + background music) ---
+    public_dir = os.path.join(work_dir, "public")
+    os.makedirs(public_dir, exist_ok=True)
+
+    audio_metadata = []
+    background_music_file = None
+    try:
+        audio_metadata = generate_scene_voiceovers(storyboard, public_dir)
+        sb_dict = storyboard.model_dump() if hasattr(storyboard, "model_dump") else storyboard
+        music_style = sb_dict.get("background_music_style", "upbeat")
+        background_music_file = prepare_background_music(music_style, public_dir)
+    except Exception as e:
+        print(f"[agentic] Warning: Audio generation failed, continuing without audio: {e}")
+
+    # --- 4. Build the implementation brief from the storyboard ---
     brief_path = os.path.join(work_dir, "TASK_BRIEF.md")
-    brief = _build_agentic_brief(storyboard, output_name)
+    brief = _build_agentic_brief(storyboard, output_name, audio_metadata=audio_metadata, background_music_file=background_music_file)
     with open(brief_path, "w") as f:
         f.write(brief)
 
@@ -311,7 +326,7 @@ async def _render_agentic(
     return local_video_path
 
 
-def _build_agentic_brief(storyboard, output_name: str) -> str:
+def _build_agentic_brief(storyboard, output_name: str, audio_metadata: list[dict] | None = None, background_music_file: str | None = None) -> str:
     """
     Build an implementation brief for Cline from a VideoStoryboard object
     designed by the Creative Director agent.
@@ -335,17 +350,28 @@ def _build_agentic_brief(storyboard, output_name: str) -> str:
     # Format color palette
     color_list = "\n".join(f"  - `{c}`" for c in colors)
 
+    # Build audio lookup by scene number
+    audio_by_scene = {}
+    if audio_metadata:
+        for am in audio_metadata:
+            audio_by_scene[am["scene_number"]] = am
+
     # Format scenes
     scenes_section = ""
     for s in scenes:
         dur_frames = int(s.get("duration_seconds", 4) * 30)
+        scene_num = s.get("scene_number", 0)
         scenes_section += f"""
-### Scene {s.get('scene_number', '?')}: {s.get('scene_name', 'Untitled')}
+### Scene {scene_num}: {s.get('scene_name', 'Untitled')}
 - **Duration**: {s.get('duration_seconds', 4)}s ({dur_frames} frames)
 - **Headline**: "{s.get('headline_text', '')}"
 - **Supporting text**: "{s.get('supporting_text', '')}"
 - **Visual concept**: {s.get('visual_concept', '')}
 - **Animation notes**: {s.get('animation_notes', '')}
+"""
+        if scene_num in audio_by_scene:
+            am = audio_by_scene[scene_num]
+            scenes_section += f"""- **Voiceover audio**: `{am['filename']}` (script: "{am['script']}", ~{am['duration_estimate']}s)
 """
 
     # Format image URLs
@@ -354,6 +380,18 @@ def _build_agentic_brief(storyboard, output_name: str) -> str:
         images_section = "## Images to Download\nDownload these to `public/` and use via `staticFile()`:\n"
         for img in image_urls:
             images_section += f"- {img}\n"
+
+    # Format audio section
+    audio_section = ""
+    if audio_metadata or background_music_file:
+        audio_section = "## Audio Files\n\nPre-generated audio files are in `public/`. Wire them into your Remotion components.\n\n"
+        if audio_metadata:
+            audio_section += "### Voiceovers (per scene)\n"
+            for am in audio_metadata:
+                audio_section += f"- Scene {am['scene_number']}: `{am['filename']}` — \"{am['script']}\"\n"
+            audio_section += "\n"
+        if background_music_file:
+            audio_section += f"### Background Music\n- `{background_music_file}` (loops, low volume)\n\n"
 
     return f"""# Video Implementation Brief
 
@@ -372,6 +410,8 @@ def _build_agentic_brief(storyboard, output_name: str) -> str:
 "{cta}"
 
 {images_section}
+
+{audio_section}
 
 ## Scene-by-Scene Storyboard
 Total duration: {total_dur}s ({total_frames} frames at 30fps)
@@ -397,6 +437,18 @@ animation notes closely.
 5. **Download any images** listed above to `public/` using curl
 6. **Render**: `npx remotion render PromoVideo out/{output_name} --concurrency=1`
 7. **Verify**: Confirm `out/{output_name}` exists and is non-empty
+
+### Audio Integration
+- Import `{{Audio, staticFile}}` from `remotion`
+- For each scene with a voiceover file, add inside the scene component:
+  `<Audio src={{staticFile("voiceover_scene_N.mp3")}} volume={{0.8}} />`
+- For background music, add at the root composition level (in `PromoVideo.tsx`):
+  `<Audio src={{staticFile("background_music.mp3")}} loop volume={{0.15}} />`
+- Audio files are already in `public/` — do NOT download them
+- **IMPORTANT: Scene timing must accommodate voiceover duration.** Each scene's
+  `<Series.Sequence>` duration MUST be at least the voiceover duration + 1 second of buffer.
+  If a voiceover is ~3s, the scene should be at least 4s (120 frames). Voiceovers that get
+  cut off by a scene transition sound broken — always leave breathing room at the end.
 
 ### Animation Toolkit (use these!)
 - `spring({{ frame, fps, config: {{ damping: 15, stiffness: 100 }} }})` — organic entrances

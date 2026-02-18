@@ -168,6 +168,20 @@ A Remotion developer will implement your vision, so be specific about visuals an
 - How things MOVE (animations, transitions)
 - The MOOD/FEEL of that moment
 
+**Voiceover & Audio**:
+- For EACH scene, write a `voiceover_script`: a short, punchy narration (1-2 sentences, 50-150 characters).
+  - Use conversational, active voice. Speak directly to the viewer.
+  - Example: "Tired of slow dashboards? Meet Bolt — your data, instantly."
+- Choose a `background_music_style` that matches the product's energy:
+  - "upbeat" for fun/energetic products
+  - "calm" for productivity/wellness tools
+  - "dramatic" for security/enterprise products
+  - "corporate" for B2B/SaaS products
+  - "none" if music would distract
+- IMPORTANT: Each scene's `duration_seconds` must be long enough for the voiceover to finish
+  plus ~1 second of breathing room. A 2-second scene is too short for most voiceovers —
+  aim for at least 3-5 seconds per scene.
+
 **Practical Constraints**:
 - Total video: 15-25 seconds (30fps, so 450-750 frames)
 - Resolution: 1920x1080

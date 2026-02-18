@@ -2,6 +2,7 @@ const STAGES = [
     { key: 'scraping', label: 'Scraping website' },
     { key: 'analyzing', label: 'Analyst AI extracting insights' },
     { key: 'storyboarding', label: 'Creative Director designing storyboard' },
+    { key: 'generating_audio', label: 'Generating voiceover audio' },
     { key: 'generating', label: 'Generating video props' },
     { key: 'rendering', label: 'Building & rendering video' },
 ];

@@ -130,7 +130,10 @@ async def process_video_agentic(job_id: str, url: str):
             stage_detail=f"{len(storyboard.scenes)} scenes, {storyboard.total_duration_seconds}s video",
         )
 
-        # Stage 4: Cline builds and renders
+        # Stage 4: Audio generation
+        _update_job(job_id, stage="generating_audio", stage_detail="Generating voiceover with ElevenLabs...")
+
+        # Stage 5: Cline builds and renders
         _update_job(job_id, stage="rendering", stage_detail="Cline is building the video from scratch...")
         dummy_props_path = os.path.abspath(f"outputs/temp_props_{job_id}.json")
         video_path = await render_video(

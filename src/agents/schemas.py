@@ -85,6 +85,10 @@ class SceneDescription(BaseModel):
         "",
         description="Specific animation ideas: entrances, exits, motion, timing",
     )
+    voiceover_script: str = Field(
+        "",
+        description="Short narration for this scene (1-2 sentences, 50-150 chars, conversational, active voice)",
+    )
 
 
 class VideoStoryboard(BaseModel):
@@ -113,3 +117,7 @@ class VideoStoryboard(BaseModel):
         description="URLs of images to download and use (logos, screenshots, etc.)",
     )
     closing_cta: str = Field(..., description="Final call-to-action text")
+    background_music_style: str = Field(
+        "upbeat",
+        description="Background music mood: upbeat | calm | dramatic | corporate | none",
+    )
