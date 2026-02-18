@@ -1,0 +1,9 @@
+.idea
+__pycache__
+outputs
+.env
+.venv
+.sandbox_id
+*.mp4
+chrome-headless-shell.zip
+example
