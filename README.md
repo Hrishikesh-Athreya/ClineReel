@@ -46,50 +46,48 @@ proc = await asyncio.create_subprocess_exec(
                           |   Job queue + routing  |
                           +----------+------------+
                                      |
-                    +----------------+----------------+
-                    |                                  |
-             TEMPLATED MODE                    AGENTIC MODE
-             (fast, consistent)                (unique, creative)
-                    |                                  |
-        +-----------+-----------+          +-----------+-----------+
-        |                       |          |                       |
-   +----v----+           +------v---+  +---v------+         +-----v------+
-   | Scraper |           | Director |  | Scraper  |         | Storyboard |
-   | Agent   |           | Agent    |  | Agent    |         | Agent      |
-   +---------+           +----------+  +----------+         +-----+------+
-        |                       |          |                       |
-   Firecrawl /            GPT-4o fills   Firecrawl /         GPT-4o designs
-   BrowserUse             template props  BrowserUse         scene-by-scene
-        |                       |          |                  creative brief
-        v                       v          v                       |
-   +----+----+           +------+---+  +---+------+               |
-   | Analyst |           | Remotion |  | Analyst  |               |
-   | Agent   |           | Template |  | Agent    |               v
-   +---------+           | Render   |  +----------+     +---------+--------+
-        |                +----------+       |           |  TASK_BRIEF.md   |
-   GPT-4o extracts            |        GPT-4o extracts  |  (written to     |
-   hook/solution/stack        v        hook/solution     |   work dir)      |
-        |                  MP4 out          |            +---------+--------+
-        v                                   v                      |
-   analysis.json                      analysis.json                v
-                                                         +---------+--------+
-                                                         |   Cline CLI      |
-                                                         |   (subprocess)   |
-                                                         |                  |
-                                                         |  1. Reads brief  |
-                                                         |  2. Deletes old  |
-                                                         |     scene files  |
-                                                         |  3. Writes new   |
-                                                         |     React/TSX    |
-                                                         |  4. Downloads    |
-                                                         |     images       |
-                                                         |  5. Runs npx     |
-                                                         |     remotion     |
-                                                         |     render       |
-                                                         +---------+--------+
-                                                                   |
-                                                                   v
-                                                                MP4 out
+                                     |
+                                     |
+                                     |
+                         +-----------+-----------+
+                         |                       |
+                     +---v------+         +-----v------+
+                     | Scraper  |         | Storyboard |
+                     | Agent    |         | Agent      |
+                     +----------+         +-----+------+
+                        |                       |
+                     Firecrawl /         GPT-4o designs
+                     BrowserUse          scene-by-scene
+                        |                creative brief
+                        v                       |
+                     +---+------+               |
+                     | Analyst  |               |
+                     | Agent    |               v
+                     +----------+     +---------+--------+
+                          |           |  TASK_BRIEF.md   |
+                    GPT-4o extracts   |  (written to     |
+                    hook/solution     |   work dir)      |
+                         |            +---------+--------+
+                         v                      |
+                   analysis.json                v
+                                      +---------+--------+
+                                      |   Cline CLI      |
+                                      |   (subprocess)   |
+                                      |                  |
+                                      |  1. Reads brief  |
+                                      |  2. Deletes old  |
+                                      |     scene files  |
+                                      |  3. Writes new   |
+                                      |     React/TSX    |
+                                      |  4. Downloads    |
+                                      |     images       |
+                                      |  5. Runs npx     |
+                                      |     remotion     |
+                                      |     render       |
+                                      +---------+--------+
+                                                |
+                                                v
+                                             MP4 out
 ```
 
 ### The Four Agents
